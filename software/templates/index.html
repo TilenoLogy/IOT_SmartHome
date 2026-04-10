@@ -1,0 +1,254 @@
+{% if temp == None %}
+    {% set temp = 'N/A' %}
+{% endif %}
+{% if humidity == None %}
+    {% set humidity = 'N/A' %}
+{% endif %}
+
+
+<!DOCTYPE html>
+<html lang="en">
+
+
+
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Home Control</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <script
+        src="https://cdn.jsdelivr.net/npm/chart.js@4.5.0">
+    </script>
+</head>
+
+<body>
+    <div class="dashboard">
+        <header>
+            <h1>Smart Home</h1>
+            <div class="metrics">
+                <div class="metric">
+                    <span class="label">Temperature</span>
+                    <span class="value" id="tempDisplay">{{ temp }}°C</span>
+                </div>
+                <div class="metric">
+                    <span class="label">Humidity</span>
+                    <span class="value" id="humidityDisplay">{{ humidity }}%</span>
+                </div>
+            </div>
+        </header>
+
+        <main class="cards-grid">
+            <!-- Light Control Card -->
+            <div class="card">
+                <div class="card-header">
+                    <h2>Living Room Light</h2>
+                    <div class="badge off" id="lightBadge">OFF</div>
+                </div>
+                
+                <div class="control-row">
+                    <button class="btn btn-primary" id="lightOnBtn">Turn On</button>
+                    <button class="btn btn-secondary" id="lightOffBtn">Turn Off</button>
+                </div>
+
+                <div class="control-row">
+                    <label for="lightColor" class="color-label">Light Color</label>
+                    <input type="color" id="lightColor" value="#ffcc00" class="color-picker">
+                </div>
+
+                <div class="divider"></div>
+
+                <div class="toggle-row">
+                    <span>Auto Mode (Motion/Time)</span>
+                    <label class="switch">
+                        <input type="checkbox" id="lightAutoMode">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Window Control Card -->
+            <div class="card">
+                <div class="card-header">
+                    <h2>Main Window</h2>
+                    <div class="badge on" id="windowBadge">OPEN</div>
+                </div>
+                
+                <div class="control-row">
+                    <button class="btn btn-primary" id="windowOpenBtn">Open Window</button>
+                    <button class="btn btn-secondary" id="windowCloseBtn">Close Window</button>
+                </div>
+
+                <div class="divider"></div>
+
+                <div class="toggle-row">
+                    <span>Auto Mode (Weather/Temp)</span>
+                    <label class="switch">
+                        <input type="checkbox" id="windowAutoMode" name="window_auto_mode">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                <canvas id="windowChart" width="400" height="200">
+
+                </canvas>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Light Controls
+        const lightAutoMode = document.getElementById('lightAutoMode');
+        const lightOnBtn = document.getElementById('lightOnBtn');
+        const lightOffBtn = document.getElementById('lightOffBtn');
+        const lightColor = document.getElementById('lightColor');
+        const lightBadge = document.getElementById('lightBadge');
+
+        // Window Controls
+        const windowAutoMode = document.getElementById('windowAutoMode');
+        const windowOpenBtn = document.getElementById('windowOpenBtn');
+        const windowCloseBtn = document.getElementById('windowCloseBtn');
+        const windowBadge = document.getElementById('windowBadge');
+
+        // Light Auto Mode Logic
+        lightAutoMode.addEventListener('change', function() {
+            const isAuto = this.checked;
+            lightOnBtn.disabled = isAuto;
+            lightOffBtn.disabled = isAuto;
+            lightColor.disabled = isAuto;
+        });
+
+        // Setup shared function to update UI from API data
+        const updateUIWithStatus = (data) => {
+            document.getElementById("tempDisplay").innerText = `${data.temp !== null ? data.temp : 'N/A'}°C`;
+            document.getElementById("humidityDisplay").innerText = `${data.humidity !== null ? data.humidity : 'N/A'}%`;
+            if (data.window) {
+                windowBadge.textContent = 'OPEN';
+                windowBadge.className = 'badge on';
+            } else {
+                windowBadge.textContent = 'CLOSED';
+                windowBadge.className = 'badge off';
+            }
+            windowAutoMode.checked = !!data.auto_mode;
+            windowOpenBtn.disabled = !!data.auto_mode;
+            windowCloseBtn.disabled = !!data.auto_mode;
+        };
+
+        // Window Auto Mode Logic
+        windowAutoMode.addEventListener('change', async function() {
+            const isAuto = this.checked;
+            windowOpenBtn.disabled = isAuto;
+            windowCloseBtn.disabled = isAuto;
+            
+            const response = await fetch('/window_auto_mode');
+            const data = await response.json();
+            updateUIWithStatus(data);
+        });
+
+        // Status visual updates (just for demo polish)
+        lightOnBtn.addEventListener('click', () => { lightBadge.textContent = 'ON'; lightBadge.className = 'badge on'; });
+        lightOffBtn.addEventListener('click', () => { lightBadge.textContent = 'OFF'; lightBadge.className = 'badge off'; });
+        
+        // Window Control Fetch Requests
+        windowOpenBtn.addEventListener('click', async () => { 
+            const response = await fetch('/window_open');
+            const data = await response.json();
+            updateUIWithStatus(data);
+        });
+        windowCloseBtn.addEventListener('click', async () => { 
+            const response = await fetch('/window_close');
+            const data = await response.json();
+            updateUIWithStatus(data);
+        });
+    
+        setInterval(async function() {
+            let response = await fetch('/api/status'); // Python returns JSON: {"temp": 24, "window": true}
+            let data = await response.json();
+            
+            updateUIWithStatus(data);
+        }, 3000);
+    
+
+
+        const ctx = document.getElementById('windowChart').getContext('2d');
+        const windowChart = new Chart(ctx, {
+            type: 'line', 
+            data: {
+                labels: [], 
+                datasets: [
+                    {
+                        label: 'Temperature (°C)',
+                        data: [], 
+                        borderColor: 'rgba(255, 99, 132, 1)', 
+                        backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                        borderWidth: 2,
+                        tension: 0.3,
+                        yAxisID: 'y' 
+                    },
+                    {
+                        label: 'Humidity (%)',
+                        data: [], 
+                        borderColor: 'rgba(54, 162, 235, 1)', 
+                        backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                        borderWidth: 2,
+                        tension: 0.3,
+                        yAxisID: 'y1' 
+                    }
+                ]
+            },
+            options: {
+                responsive: true, 
+                scales: {
+                    y: {
+                        type: 'linear',
+                        display: true,
+                        position: 'left',
+                        title: { display: true, text: 'Temperature (°C)' }
+                    },
+                    y1: {
+                        type: 'linear',
+                        display: true,
+                        position: 'right',
+                        title: { display: true, text: 'Humidity (%)' },
+                        grid: { drawOnChartArea: false } 
+                    }
+                }
+            }
+        });
+
+        // 2. Fetch data and update the Chart
+        setInterval(async function() {
+            try {
+                // Fetch the latest data from Python
+                let response = await fetch('/api/status');
+                let data = await response.json();
+                
+                // Get current time for the X-axis label
+                let now = new Date();
+                let timeString = now.getHours() + ":" + now.getMinutes() + ":" + now.getSeconds();
+
+                // Add the new time to labels and the new temp to the data
+                windowChart.data.labels.push(timeString);
+                windowChart.data.datasets[0].data.push(data.temp);
+                windowChart.data.datasets[1].data.push(data.humidity);
+
+                // Optional: Keep the graph from getting too squished (keep last 20 points)
+                if (windowChart.data.labels.length > 20) {
+                    windowChart.data.labels.shift();             // Remove oldest label
+                    windowChart.data.datasets[0].data.shift();   // Remove oldest data point
+                    windowChart.data.datasets[1].data.shift();   // Remove oldest data point
+                }
+
+                // Tell the Chart to redraw itself with the new data
+                windowChart.update();
+                
+            } catch (error) {
+                console.error("Error fetching data:", error);
+            }
+        }, 60000); 
+
+
+    </script>
+</body>
+
+</html>

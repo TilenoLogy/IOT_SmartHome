@@ -1,0 +1,237 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background-color: #0f1115;
+    color: #e2e8f0;
+    font-family: 'Inter', sans-serif;
+    display: flex;
+    justify-content: center;
+    padding: 40px 20px;
+    line-height: 1.5;
+}
+
+.dashboard {
+    width: 100%;
+    max-width: 800px;
+}
+
+/* Header & Metrics */
+header {
+    margin-bottom: 40px;
+    text-align: center;
+}
+
+header h1 {
+    font-size: 2.5rem;
+    font-weight: 600;
+    margin-bottom: 25px;
+    color: #ffffff;
+    letter-spacing: -0.5px;
+}
+
+.metrics {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.metric {
+    background: #1e2128;
+    padding: 15px 30px;
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    border: 1px solid #2d3139;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
+    min-width: 150px;
+}
+
+.metric .label {
+    font-size: 0.85rem;
+    color: #94a3b8;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.metric .value {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #38bdf8;
+    margin-top: 5px;
+}
+
+/* Cards Grid */
+.cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 25px;
+}
+
+.card {
+    background: #1e2128;
+    border: 1px solid #2d3139;
+    border-radius: 16px;
+    padding: 25px;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2);
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+}
+
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.card-header h2 {
+    font-size: 1.25rem;
+    font-weight: 500;
+    color: #f1f5f9;
+}
+
+/* Status Badges */
+.badge {
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+.badge.on { 
+    background: rgba(16, 185, 129, 0.15); 
+    color: #34d399; 
+    border: 1px solid rgba(16, 185, 129, 0.3); 
+}
+
+.badge.off { 
+    background: rgba(239, 68, 68, 0.15); 
+    color: #f87171; 
+    border: 1px solid rgba(239, 68, 68, 0.3); 
+}
+
+/* Controls & Buttons */
+.control-row {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
+.btn {
+    flex: 1;
+    padding: 12px 16px;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: inherit;
+}
+
+.btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    transform: none !important;
+}
+
+.btn-primary { 
+    background: #3b82f6; 
+    color: white; 
+}
+.btn-primary:hover:not(:disabled) { 
+    background: #2563eb; 
+    transform: translateY(-1px); 
+}
+
+.btn-secondary { 
+    background: #3f3f46; 
+    color: white; 
+}
+.btn-secondary:hover:not(:disabled) { 
+    background: #52525b; 
+    transform: translateY(-1px); 
+}
+
+/* Color Picker */
+.color-label {
+    flex: 1;
+    font-size: 0.95rem;
+    color: #cbd5e1;
+    text-align: left;
+}
+
+.color-picker {
+    -webkit-appearance: none;
+    border: none;
+    width: 60px;
+    height: 35px;
+    border-radius: 6px;
+    cursor: pointer;
+    background: transparent;
+}
+
+.color-picker::-webkit-color-swatch-wrapper { padding: 0; }
+.color-picker::-webkit-color-swatch { border: 2px solid #334155; border-radius: 6px; }
+
+.divider {
+    height: 1px;
+    background: #334155;
+    margin: 5px 0;
+}
+
+/* iOS-style Toggle Switch */
+.toggle-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: #cbd5e1;
+    font-size: 0.95rem;
+}
+
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 48px;
+    height: 26px;
+}
+
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-color: #475569;
+    transition: .3s;
+    border-radius: 26px;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 20px;
+    width: 20px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    transition: .3s;
+    border-radius: 50%;
+}
+
+input:checked + .slider { 
+    background-color: #10b981; 
+}
+input:checked + .slider:before { 
+    transform: translateX(22px); 
+}
