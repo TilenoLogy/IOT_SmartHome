@@ -29,6 +29,9 @@ const char* password = "12345678";
 #define HREF_GPIO_NUM     23
 #define PCLK_GPIO_NUM     22
 
+
+#define JPEG_QUALITY 10
+
 httpd_handle_t stream_httpd = NULL;
 
 // The streaming MJPEG handler
@@ -51,7 +54,7 @@ static esp_err_t stream_handler(httpd_req_t *req) {
         } else {
             // Ensure format is JPEG
             if(fb->format != PIXFORMAT_JPEG){
-                bool jpeg_converted = frame2jpg(fb, 80, &_jpg_buf, &_jpg_buf_len);
+                bool jpeg_converted = frame2jpg(fb, JPEG_QUALITY, &_jpg_buf, &_jpg_buf_len);
                 esp_camera_fb_return(fb);
                 fb = NULL;
                 if(!jpeg_converted){
@@ -131,7 +134,7 @@ void setup() {
     config.pixel_format = PIXFORMAT_JPEG;
     
     config.frame_size = FRAMESIZE_VGA;   // 640x480
-    config.jpeg_quality = 12;            // 10-15
+    config.jpeg_quality = JPEG_QUALITY;  // 10-15
     config.fb_count = 2;                 // Double buffering to smooth out framerate
 
     // Init Camera

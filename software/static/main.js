@@ -93,12 +93,25 @@ async function fetchOccupants() {
         } else if (!data.occupants || data.occupants.length === 0) {
             occupantListDisplay.innerHTML = '<li>Room is empty.</li>';
         } else {
+            if (data.unresolved_exit_count > 0) {
+                const warning = document.createElement('li');
+                warning.style.color = '#fbbf24';
+                warning.style.marginBottom = '8px';
+                warning.textContent = `* Unresolved exits: ${data.unresolved_exit_count}. Some identities may be stale.`;
+                occupantListDisplay.appendChild(warning);
+            }
+
             data.occupants.forEach(occ => {
                 let li = document.createElement('li');
-                // Trim the ID for display if you want, e.g. "54_Alice" -> "Alice"
-                let parts = occ.split('_');
-                let name = parts.length > 1 ? parts.slice(1).join('_') : occ;
-                li.textContent = name;
+                // Supports both old string format and new structured payload.
+                if (typeof occ === 'string') {
+                    let parts = occ.split('_');
+                    let name = parts.length > 1 ? parts.slice(1).join('_') : occ;
+                    li.textContent = name;
+                } else {
+                    const marker = occ.certain ? '' : ' *';
+                    li.textContent = `${occ.name}${marker}`;
+                }
                 occupantListDisplay.appendChild(li);
             });
         }

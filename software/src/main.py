@@ -4,7 +4,7 @@ import socket
 import sqlite3
 import time
 from flask import Flask, render_template, jsonify
-from vision_tracker import start_tracker, occupants
+from vision_tracker import start_tracker
 
 
 HOST = '192.168.2.4'
@@ -49,10 +49,18 @@ def get_status():
 def get_occupants():
     # Pass along camera connection state
     camera_connected = tracker_instance.camera_connected if tracker_instance else False
+    occupancy_state = tracker_instance.get_public_state() if tracker_instance else {
+        "occupants": [],
+        "count": 0,
+        "unresolved_exit_count": 0,
+        "has_uncertainty": False,
+    }
     return jsonify({
-        "occupants": list(occupants.keys()), 
-        "count": len(occupants),
-        "camera_connected": camera_connected
+        "occupants": occupancy_state["occupants"],
+        "count": occupancy_state["count"],
+        "unresolved_exit_count": occupancy_state["unresolved_exit_count"],
+        "has_uncertainty": occupancy_state["has_uncertainty"],
+        "camera_connected": camera_connected,
     })
 
 @app.route('/window_auto_mode')
