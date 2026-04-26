@@ -36,10 +36,36 @@
                     <span class="label">Humidity</span>
                     <span class="value" id="humidityDisplay">{{ humidity }}%</span>
                 </div>
+                <div class="metric">
+                    <span class="label">Occupancy</span>
+                    <span class="value"><span id="occupantHeaderDisplay">0</span></span>
+                </div>
             </div>
         </header>
 
         <main class="cards-grid">
+            <!-- Room Occupancy Card -->
+            <div class="card">
+                <div class="card-header">
+                    <h2>Room Occupancy</h2>
+                    <div class="badge on" id="occupantBadge">LIVE</div>
+                </div>
+                
+                <div style="text-align: center; margin: 15px 0;">
+                    <span style="font-size: 3rem; font-weight: 600; color: var(--primary);" id="occupantCountDisplay">0</span>
+                    <div style="color: var(--text-secondary); text-transform: uppercase; font-size: 0.8rem; letter-spacing: 1px;">People Inside</div>
+                </div>
+
+                <div class="divider"></div>
+
+                <div class="toggle-row" style="flex-direction: column; align-items: flex-start; gap: 10px;">
+                    <span style="font-weight: 500; font-size: 0.9rem;">Current Occupants:</span>
+                    <ul id="occupantListDisplay" style="list-style-type: none; padding: 0; margin: 0; width: 100%; max-height: 120px; overflow-y: auto;">
+                        <li style="padding: 8px 12px; background: rgba(0,0,0,0.05); border-radius: 6px; font-size: 0.85rem; margin-bottom: 5px;">Loading...</li>
+                    </ul>
+                </div>
+            </div>
+
             <!-- Light Control Card -->
             <div class="card">
                 <div class="card-header">
@@ -96,159 +122,8 @@
         </main>
     </div>
 
-    <script>
-        // Light Controls
-        const lightAutoMode = document.getElementById('lightAutoMode');
-        const lightOnBtn = document.getElementById('lightOnBtn');
-        const lightOffBtn = document.getElementById('lightOffBtn');
-        const lightColor = document.getElementById('lightColor');
-        const lightBadge = document.getElementById('lightBadge');
-
-        // Window Controls
-        const windowAutoMode = document.getElementById('windowAutoMode');
-        const windowOpenBtn = document.getElementById('windowOpenBtn');
-        const windowCloseBtn = document.getElementById('windowCloseBtn');
-        const windowBadge = document.getElementById('windowBadge');
-
-        // Light Auto Mode Logic
-        lightAutoMode.addEventListener('change', function() {
-            const isAuto = this.checked;
-            lightOnBtn.disabled = isAuto;
-            lightOffBtn.disabled = isAuto;
-            lightColor.disabled = isAuto;
-        });
-
-        // Setup shared function to update UI from API data
-        const updateUIWithStatus = (data) => {
-            document.getElementById("tempDisplay").innerText = `${data.temp !== null ? data.temp : 'N/A'}°C`;
-            document.getElementById("humidityDisplay").innerText = `${data.humidity !== null ? data.humidity : 'N/A'}%`;
-            if (data.window) {
-                windowBadge.textContent = 'OPEN';
-                windowBadge.className = 'badge on';
-            } else {
-                windowBadge.textContent = 'CLOSED';
-                windowBadge.className = 'badge off';
-            }
-            windowAutoMode.checked = !!data.auto_mode;
-            windowOpenBtn.disabled = !!data.auto_mode;
-            windowCloseBtn.disabled = !!data.auto_mode;
-        };
-
-        // Window Auto Mode Logic
-        windowAutoMode.addEventListener('change', async function() {
-            const isAuto = this.checked;
-            windowOpenBtn.disabled = isAuto;
-            windowCloseBtn.disabled = isAuto;
-            
-            const response = await fetch('/window_auto_mode');
-            const data = await response.json();
-            updateUIWithStatus(data);
-        });
-
-        // Status visual updates (just for demo polish)
-        lightOnBtn.addEventListener('click', () => { lightBadge.textContent = 'ON'; lightBadge.className = 'badge on'; });
-        lightOffBtn.addEventListener('click', () => { lightBadge.textContent = 'OFF'; lightBadge.className = 'badge off'; });
-        
-        // Window Control Fetch Requests
-        windowOpenBtn.addEventListener('click', async () => { 
-            const response = await fetch('/window_open');
-            const data = await response.json();
-            updateUIWithStatus(data);
-        });
-        windowCloseBtn.addEventListener('click', async () => { 
-            const response = await fetch('/window_close');
-            const data = await response.json();
-            updateUIWithStatus(data);
-        });
-    
-        setInterval(async function() {
-            let response = await fetch('/api/status'); // Python returns JSON: {"temp": 24, "window": true}
-            let data = await response.json();
-            
-            updateUIWithStatus(data);
-        }, 3000);
-    
-
-
-        const ctx = document.getElementById('windowChart').getContext('2d');
-        const windowChart = new Chart(ctx, {
-            type: 'line', 
-            data: {
-                labels: [], 
-                datasets: [
-                    {
-                        label: 'Temperature (°C)',
-                        data: [], 
-                        borderColor: 'rgba(255, 99, 132, 1)', 
-                        backgroundColor: 'rgba(255, 99, 132, 0.2)',
-                        borderWidth: 2,
-                        tension: 0.3,
-                        yAxisID: 'y' 
-                    },
-                    {
-                        label: 'Humidity (%)',
-                        data: [], 
-                        borderColor: 'rgba(54, 162, 235, 1)', 
-                        backgroundColor: 'rgba(54, 162, 235, 0.2)',
-                        borderWidth: 2,
-                        tension: 0.3,
-                        yAxisID: 'y1' 
-                    }
-                ]
-            },
-            options: {
-                responsive: true, 
-                scales: {
-                    y: {
-                        type: 'linear',
-                        display: true,
-                        position: 'left',
-                        title: { display: true, text: 'Temperature (°C)' }
-                    },
-                    y1: {
-                        type: 'linear',
-                        display: true,
-                        position: 'right',
-                        title: { display: true, text: 'Humidity (%)' },
-                        grid: { drawOnChartArea: false } 
-                    }
-                }
-            }
-        });
-
-        // 2. Fetch data and update the Chart
-        setInterval(async function() {
-            try {
-                // Fetch the latest data from Python
-                let response = await fetch('/api/status');
-                let data = await response.json();
-                
-                // Get current time for the X-axis label
-                let now = new Date();
-                let timeString = now.getHours() + ":" + now.getMinutes() + ":" + now.getSeconds();
-
-                // Add the new time to labels and the new temp to the data
-                windowChart.data.labels.push(timeString);
-                windowChart.data.datasets[0].data.push(data.temp);
-                windowChart.data.datasets[1].data.push(data.humidity);
-
-                // Optional: Keep the graph from getting too squished (keep last 20 points)
-                if (windowChart.data.labels.length > 20) {
-                    windowChart.data.labels.shift();             // Remove oldest label
-                    windowChart.data.datasets[0].data.shift();   // Remove oldest data point
-                    windowChart.data.datasets[1].data.shift();   // Remove oldest data point
-                }
-
-                // Tell the Chart to redraw itself with the new data
-                windowChart.update();
-                
-            } catch (error) {
-                console.error("Error fetching data:", error);
-            }
-        }, 60000); 
-
-
-    </script>
+    <!-- Include external JavaScript logic -->
+    <script src="{{ url_for('static', filename='main.js') }}"></script>
 </body>
 
 </html>

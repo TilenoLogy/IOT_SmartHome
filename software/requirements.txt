@@ -1,0 +1,9 @@
+matplotlib
+flask
+pyserial
+opencv-python
+ultralytics
+face_recognition
+filterpy
+scipy
+

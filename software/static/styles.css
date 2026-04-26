@@ -16,7 +16,7 @@ body {
 
 .dashboard {
     width: 100%;
-    max-width: 800px;
+    max-width: 1400px;
 }
 
 /* Header & Metrics */
@@ -68,8 +68,10 @@ header h1 {
 /* Cards Grid */
 .cards-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    /* On desktops, try to fit columns equally; on smaller screens, wrap nicely */
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
     gap: 25px;
+    align-items: flex-start; /* Prevents cards from unnecessarily stretching down if one is taller */
 }
 
 .card {

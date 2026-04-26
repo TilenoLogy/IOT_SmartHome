@@ -1,4 +1,6 @@
-**/.pio
 **/.vscode/
-**/podatki.db
 **/__pycache__/
+**/.pio
+**/podatki.db
+**/*.pt
+software/faces/
