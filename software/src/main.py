@@ -25,8 +25,8 @@ app = Flask(__name__,
 
 automode = False
 open1 = False
-
-
+light_automode = True
+light_manual_state = False
 
 temp = None
 hum = None
@@ -44,6 +44,37 @@ def index():
 @app.route('/api/status')
 def get_status():
     return jsonify({"temp": temp, "humidity": hum, "window": open1, "auto_mode": automode})
+
+@app.route('/api/light_status')
+def get_light_status():
+    should_be_on = False
+    
+    if light_automode:
+        occupancy_count = 0
+        if tracker_instance:
+            occupancy_state = tracker_instance.get_public_state()
+            occupancy_count = occupancy_state.get("count", 0)
+        should_be_on = occupancy_count > 0
+    else:
+        should_be_on = light_manual_state
+        
+    return jsonify({
+        "light_on": should_be_on,
+        "auto_mode": light_automode,
+        "manual_state": light_manual_state
+    })
+
+@app.route('/api/light_toggle_auto')
+def toggle_light_auto():
+    global light_automode
+    light_automode = not light_automode
+    return jsonify({"success": True, "auto_mode": light_automode})
+
+@app.route('/api/light_toggle_manual')
+def toggle_light_manual():
+    global light_manual_state
+    light_manual_state = not light_manual_state
+    return jsonify({"success": True, "manual_state": light_manual_state})
 
 @app.route('/api/occupants')
 def get_occupants():
