@@ -38,7 +38,7 @@ class VisionTracker:
 
         # Robust crossing and occupancy settings
         self.line_deadzone_px = 14
-        self.track_event_cooldown_sec = 1.0
+        self.track_event_cooldown_sec = 0.5
 
         # Performance tuning
         self.show_debug_window = True

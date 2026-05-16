@@ -2,7 +2,6 @@
 const lightAutoMode = document.getElementById('lightAutoMode');
 const lightOnBtn = document.getElementById('lightOnBtn');
 const lightOffBtn = document.getElementById('lightOffBtn');
-const lightColor = document.getElementById('lightColor');
 const lightBadge = document.getElementById('lightBadge');
 
 // Window Controls
@@ -21,7 +20,6 @@ lightAutoMode.addEventListener('change', function() {
     const isAuto = this.checked;
     lightOnBtn.disabled = isAuto;
     lightOffBtn.disabled = isAuto;
-    lightColor.disabled = isAuto;
 });
 
 // Setup shared function to update UI from API data

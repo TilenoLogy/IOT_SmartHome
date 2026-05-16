@@ -161,27 +161,6 @@ header h1 {
     transform: translateY(-1px); 
 }
 
-/* Color Picker */
-.color-label {
-    flex: 1;
-    font-size: 0.95rem;
-    color: #cbd5e1;
-    text-align: left;
-}
-
-.color-picker {
-    -webkit-appearance: none;
-    border: none;
-    width: 60px;
-    height: 35px;
-    border-radius: 6px;
-    cursor: pointer;
-    background: transparent;
-}
-
-.color-picker::-webkit-color-swatch-wrapper { padding: 0; }
-.color-picker::-webkit-color-swatch { border: 2px solid #334155; border-radius: 6px; }
-
 .divider {
     height: 1px;
     background: #334155;
