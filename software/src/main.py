@@ -70,10 +70,10 @@ def toggle_light_auto():
     light_automode = not light_automode
     return jsonify({"success": True, "auto_mode": light_automode})
 
-@app.route('/api/light_toggle_manual')
-def toggle_light_manual():
+@app.route('/api/light_set_manual/<int:state>')
+def set_light_manual(state):
     global light_manual_state
-    light_manual_state = not light_manual_state
+    light_manual_state = bool(state)
     return jsonify({"success": True, "manual_state": light_manual_state})
 
 @app.route('/api/occupants')
@@ -193,7 +193,7 @@ bg_thread.start()
 tracker_instance = start_tracker()
 
 if __name__ == '__main__':
-    app.run(debug=True, use_reloader=False)
+    app.run(host='0.0.0.0', debug=True, use_reloader=False)
 
 
 

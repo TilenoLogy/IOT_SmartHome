@@ -10,11 +10,11 @@ occupants = {}
 
 
 class VisionTracker:
-    def __init__(self, stream_url="http://192.168.137.118:81/stream"):
+    def __init__(self, stream_url="http://192.168.137.191:81/stream"):
         self.stream_url = stream_url
         self.running = False
         self.camera_connected = False
-        self.model = YOLO("yolov8n.pt")  # Lightweight model
+        self.model = YOLO("yolov8s.pt")  # Upgraded to small model for better tracking
         self.state_lock = threading.Lock()
 
         self.faces_dir = os.path.join(os.path.dirname(__file__), "..", "faces")
@@ -43,8 +43,8 @@ class VisionTracker:
         # Performance tuning
         self.show_debug_window = True
         self.infer_every_n_frames = 1
-        self.yolo_imgsz = 512
-        self.yolo_conf = 0.35
+        self.yolo_imgsz = 640
+        self.yolo_conf = 0.40
         self.min_face_crop_px = 48
         self.face_match_threshold = 0.70
 

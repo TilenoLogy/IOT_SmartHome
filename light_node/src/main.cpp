@@ -3,9 +3,9 @@
 #include <HTTPClient.h>
 #include <ArduinoJson.h>
 
-const char* ssid = "YOUR_WIFI_SSID";
-const char* password = "YOUR_WIFI_PASSWORD";
-const char* serverApiUrl = "http://192.168.2.4:5000/api/light_status";
+const char* ssid = "PC-NIKO";
+const char* password = "12345678";
+const char* serverApiUrl = "http://172.30.10.201:5000/api/light_status";
 
 const int LIGHT_PIN = 2;
 

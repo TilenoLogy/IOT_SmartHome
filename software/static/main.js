@@ -16,10 +16,11 @@ const occupantHeaderDisplay = document.getElementById('occupantHeaderDisplay');
 const occupantListDisplay = document.getElementById('occupantListDisplay');
 
 // Light Auto Mode Logic
-lightAutoMode.addEventListener('change', function() {
+lightAutoMode.addEventListener('change', async function() {
     const isAuto = this.checked;
     lightOnBtn.disabled = isAuto;
     lightOffBtn.disabled = isAuto;
+    await fetch('/api/light_toggle_auto');
 });
 
 // Setup shared function to update UI from API data
@@ -50,8 +51,16 @@ windowAutoMode.addEventListener('change', async function() {
 });
 
 // Status visual updates (just for demo polish)
-lightOnBtn.addEventListener('click', () => { lightBadge.textContent = 'ON'; lightBadge.className = 'badge on'; });
-lightOffBtn.addEventListener('click', () => { lightBadge.textContent = 'OFF'; lightBadge.className = 'badge off'; });
+lightOnBtn.addEventListener('click', async () => { 
+    lightBadge.textContent = 'ON';
+    lightBadge.className = 'badge on';
+    await fetch('/api/light_set_manual/1');
+});
+lightOffBtn.addEventListener('click', async () => { 
+    lightBadge.textContent = 'OFF';
+    lightBadge.className = 'badge off';
+    await fetch('/api/light_set_manual/0');
+});
 
 // Window Control Fetch Requests
 windowOpenBtn.addEventListener('click', async () => { 
@@ -124,6 +133,22 @@ setInterval(async function() {
         let response = await fetch('/api/status'); // Python returns JSON: {"temp": 24, "window": true}
         let data = await response.json();
         updateUIWithStatus(data);
+        
+        // Also fetch light status
+        let lightResponse = await fetch('/api/light_status');
+        let lightData = await lightResponse.json();
+        
+        lightAutoMode.checked = lightData.auto_mode;
+        lightOnBtn.disabled = lightData.auto_mode;
+        lightOffBtn.disabled = lightData.auto_mode;
+        
+        if (lightData.light_on) {
+            lightBadge.textContent = 'ON';
+            lightBadge.className = 'badge on';
+        } else {
+            lightBadge.textContent = 'OFF';
+            lightBadge.className = 'badge off';
+        }
         
         fetchOccupants();
     } catch (e) {
